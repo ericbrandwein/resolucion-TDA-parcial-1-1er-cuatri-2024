@@ -1,0 +1,285 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage[normalem]{ulem}
+
+\begin{document}
+
+\title{Resolución primer parcial TN}
+\author{}
+\maketitle
+
+\section*{Pregunta 1}
+\subsection*{Respuestas correctas}
+\begin{itemize}
+    \item $O(j! \cdot j)$
+\end{itemize}
+
+\subsection*{Explicación}
+Hay dos formas de generar todas las posibles soluciones:
+
+\begin{enumerate}
+    \item Elegir un cajón para cada juguete. Esto nos da $c^j$ posibles asignaciones.
+    \item Ordenar los juguetes de alguna manera, y poner los primeros en el primer cajón hasta que no entren más, los siguientes en el segundo hasta que no entren más, etc. Aquí hay $j!$ combinaciones posibles.
+\end{enumerate}
+
+En principio uno podría decir listo, estas son las complejidades del algoritmo. Pero \textbf{estaría equivocado}: estas cantidades describen cuántas \textbf{hojas} va a haber en el árbol de backtracking, no la cantidad total de nodos, ni cuánto tiempo se tarda por nodo. Vamos entonces a analizar los dos casos por separado.
+
+\begin{enumerate}
+    \item Un algoritmo de backtracking que asigne un cajón a cada juguete construiría la solución parcial como una asignación de los primeros $i$ juguetes a cajones. Pasar por todas las elecciones de cajones para un juguete no tarda más que $O(1)$ por cajón, así que cada nodo interno del backtracking toma $O(1)$. ¿Cuántos nodos tiene nuestro árbol? El primer nivel tendrá uno solo, el segundo tendrá $c$, el tercero $c²$... es decir, la cantidad total de nodos es 
+    \[
+    O\left(\sum_{i=0}^j c^i\right) = O\left(\frac{c(c^j - 1)}{c-1}\right) = O(c^j).
+    \]
+    Sólo faltaría ver cuánto trabajo hacemos en las $c^j$ hojas del árbol. En principio, tendríamos que fijarnos para la asignación de $j$ juguetes si entran en todos los cajones. Hacerlo bien naïf involucraría un costo de $O(j)$ en cada hoja, lo que nos lleva la complejidad a $O(c^j\cdot j)$. Por suerte podemos repartir ese trabajo entre todos los nodos. Vamos guardando un arreglo con la suma de las alturas de los juguetes en cada cajón. Cuando agregamos un juguete, directamente le sumamos su altura al cajón correspondiente. Así, agregar un juguete sigue siendo $O(1)$. Además, vamos pasando un número que es la cantidad de cajones que están sobrepasados, el cual cambiamos cuando agregamos un juguete. En las hojas entonces solo necesitamos fijarnos si ese número es 0, lo cual es $O(1)$. Al final conseguimos la complejidad que queríamos de $O(c^j)$...?
+    
+    \textbf{NO.} La igualdad de arriba solo vale si $c>1$. Si $c = 1$, esto termina siendo $O(j)$. La $O$ grande funciona raro con múltiples variables, lo que nos obliga a decir que esto en realidad es $O(c^j + j)$. Recontra molesto, y parte de la razón por la que fuimos más laxos con la corrección.
+    
+    \item Para construir un orden de los juguetes podemos, por cada posición del orden, elegir un juguete de los que queden poner. Una solución parcial entonces va a ser un prefijo de un orden de juguetes. Agregar un juguete nuevo a este orden, si se hace inteligentemente, se puede hacer en $O(1)$. Eso es lo que vamos a tardar en cada nodo interno entonces en principio. ¿Cuántos nodos internos hay? Va a haber uno por cada posible prefijo de un orden, o sea, $(j+1)!$. Perfecto, ahora veamos cuánto se tarda en cada hoja. Si lo hacemos bien fuerza bruta, tendríamos que recorrer todos los juguetes en cada hoja, sumando en un contador la altura de cada uno hasta pasarnos de $A$. Pero esto está todo bien, porque, como hay $O(j!)$ hojas, la complejidad en las hojas nos queda $O(j! \cdot j)$. En total entonces tenemos 
+    \[
+    O((j+1)! + j! \cdot j) = O(j! \cdot (j+1) + j! \cdot j) = O(j! \cdot (j+1 + j))= O(j! \cdot j).
+    \]
+\end{enumerate}
+
+\textbf{Bonus track:} hay \textit{otra} posible solución, si observamos que en la 1. asignar el primer juguete al cajón 1 o al cajón 26 es lo mismo. Lo que vamos a hacer entonces es asignar juguetes a cajones que ya tengan algún juguete, o a un cajón nuevo cualquiera. Cada nodo del árbol va a tener una cantidad de hijos variable, que va a depender de cuántos cajones había asignado su padre. La cantidad de nodos del árbol acá nos da 
+\[
+O\left(\sum_{i=0}^j \sum_{k=1}^c S(i, k)\right),
+\]
+donde $S(i, k)$ es el \href{https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind}{número de Stirling de segundo tipo}. Andá a saber eso.
+
+\section*{Pregunta 2}
+\subsection*{Respuestas correctas}
+\begin{itemize}
+    \item Ninguna de estas respuestas es correcta.
+\end{itemize}
+
+\subsection*{Explicación}
+\begin{itemize}
+    \item \sout{Utilizar memorización garantiza que solo se calculen los subproblemas necesarios, lo que siempre reduce el tiempo de ejecución del algoritmo.} No siempre se reduce el tiempo de ejecución. Además, a veces calculás subproblemas que después no usás, como ser muchas veces que hacemos bottom-up.
+    \item \sout{Cuando hay múltiples parámetros en la función implementada se necesita una matriz (de 2 o más dimensiones) para memorizar los resultados.} A veces algunos de los parámetros son constantes que no hace falta memroizar.
+    \item \sout{Utilizar memorización te obliga a utilizar una solución recursiva para cada problema.} Fijate cómo te sale más fácil hacer bottom-up y después hablamos.
+    \item \textbf{Ninguna de estas respuestas es correcta.} Esta sí es correcta, así que medio mentirosa.
+    \item \sout{Hay más de un posible valor de retorno para cada subproblema.} No podríamos memorizar si este fuese el caso.
+\end{itemize}
+
+\section*{Pregunta 3}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item $O(\log(n)\cdot k)$
+\end{itemize}
+
+\textbf{Explicación}
+
+Acá hay dos posibles algoritmos, los dos con la misma complejidad. Los dos se bancan en el hecho que nos podemos fijar rápidamente si un intervalo de valores tiene un hueco o no. Por ejemplo, si tenemos que el elemento de la posición 3 es 15, y el de la posición 5 es el 13, como el arreglo tiene todos elementos es decreciente, forzosamente la posición 4 tiene que tener el 14, y entonces no hay ningún hueco entre la posición 3 y la 5. En general, si tenemos que la diferencia entre el elemento en la posición $i$ y el de la posición $j$ es igual a $j - i$, no hay huecos entre las posiciones $j$ e $i$.
+
+El primer algoritmo consiste en partir el arreglo por la mitad, encontrar el mayor hueco a la izquierda y a la derecha recursivamente, y tomar el mayor de los dos. En principio, esto sería una recurrencia en la que en cada paso partimos en 2, y sumamos un costo constante por cada merge: 
+\[
+T(n) = 2T(n/2) + 1.
+\]
+Esto es $O(n)$. Podemos sin embargo aplicar lo que notamos en el párrafo anterior para no hacer recurrencia cuando ya sabemos que en una de las mitades no puede haber ningún hueco. Como sabemos que hay $k$ huecos, como máximo vamos a tener $k$ caminos en el árbol de recurrencia que alcancen una hoja del último nivel. Podemos acotar la cantidad de nodos en este árbol como $O(\log(n)\cdot k)$, lo cual nos deja la complejidad que queríamos. Sin embargo, la cantidad de hijos de cada nodo en el árbol no es constante, y entonces no podemos usar el teorema maestro para calcular la complejidad.
+
+El segundo algoritmo, en cambio, usa búsqueda binaria para encontrar la primer posición en la que se detecta que hay un hueco, usando la propiedad que vimos antes. Para la búsqueda binaria, se fija si entre la posición 0 y la $i$ puede haber un hueco comparando las dos posiciones. Si hay un hueco, achica el $i$, sino, lo agranda. Una vez que encontró la primer posición en la que hay un hueco, reinicia la búsqueda desde esa posición. En resumen, hace una búsqueda binaria por cada hueco en el arreglo, es decir, $O(\log(n)\cdot k)$. El chiste acá es que el algoritmo de búsqueda binaria es divide and conquer, o sea que el $\log(n)$ puede salir del teorema maestro. Técnicamente no se puede calcular la complejidad del algoritmo total con el teorema maestro, y es discutible si esto es un algoritmo de divide and conquer, pero ninguna de las respuestas que dan razones por las que no se puede calcular su complejidad con el teorema maestro dan la razón correcta. Decidimos entonces poner como correctas las dos opciones.
+
+\section*{Pregunta 4}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item La complejidad es ajustada, la demostración es incorrecta.
+\end{itemize}
+
+\textbf{Explicación}
+
+La demo es incorrecta porque $\epsilon$ no puede ser negativo en el teorema maestro. Sin embargo, $5 \cdot n^{1/4}$ sí pertenece a $O(n^{\log_9 3-\epsilon})$ para un $\epsilon$ muy chico, ya que $O(n^{\log_9 3-\epsilon}) \approx O(n^{1/2})$, así que podemos arreglar la demo para que nos quede la misma complejidad.
+
+\section*{Pregunta 5}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item Toda orientación acíclica de un grafo tiene al menos un sumidero.
+    \item Todo grafo etiquetado con al menos una arista tiene una cantidad par de orientaciones acíclicas distintas.
+\end{itemize}
+
+\textbf{Explicación}
+
+\begin{itemize}
+    \item \textit{Toda orientación acíclica de un grafo tiene al menos un sumidero.} Si no hay sumidero, forzosamente existe un recorrido infinito, que como el grafo es finito debe repetir vértices, y por lo tanto tener un ciclo.
+    \item \textit{Todo grafo etiquetado con al menos una arista tiene una cantidad par de orientaciones acíclicas distintas.} Tomemos una orientación acíclica cualquiera y demos vuelta todas las aristas. Claramente sigue siendo acíclica, porque cada ciclo de la orientación nueva sería un ciclo de la orientación original. Emparejar las orientaciones acíclicas de esta manera demuestra que son todos grupitos de 2, y por lo tanto hay una cantidad par.
+    \item \sout{Todo grafo etiquetado con al menos una arista tiene una cantidad impar de orientaciones acíclicas distintas.} Es el contrario de la primera.
+    \item \sout{Todo grafo etiquetado tiene al menos un sumidero.} Un grafo etiquetado ni siquiera es dirigido.
+\end{itemize}
+
+\section*{Pregunta 6}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item Toda orientación acíclica de $K_n$ tiene un único sumidero.
+    \item Si a una orientación acíclica $H$ de un grafo le agregamos un nuevo vértice $v$ junto a una arista $u \rightarrow v$ para todo vértice $u$ de $H$, entonces el grafo resultante es la orientación acíclica de un grafo.
+\end{itemize}
+
+\textbf{Explicación}
+
+\begin{itemize}
+    \item \textit{Toda orientación acíclica de $K_n$ tiene un único sumidero.} Si tuviese dos $u$ y $v$, serían adyacentes en el grafo original, y la arista $(u, v)$ tendría que o salir de $u$ o salir de $v$, contradiciendo que son los dos sumideros. Además, sabemos que tiene por lo menos uno por lo visto en la Pregunta 5.
+    \item \textit{Si a una orientación acíclica $H$ de un grafo le agregamos un nuevo vértice $v$ junto a una arista $u \rightarrow v$ para todo vértice $u$ de $H$, entonces el grafo resultante es la orientación acíclica de un grafo.} Ningún ciclo puede contener a $v$, porque $v$ es sumidero. Y tampoco ningún ciclo puede no contener a $v$, porque entonces sería un ciclo en $H$, que era una orientación acíclica.
+    \item \sout{Toda orientación acíclica de $K_n$ tiene exactamente dos sumideros (para $n \geq 4$).} Ver el primer ítem.
+    \item \sout{El grafo $K_n$ etiquetado tiene exactamente $n^2$ orientaciones acíclicas distintas.} Son $n!$, todos los posibles órdenes de los vértices.
+\end{itemize}
+
+\section*{Pregunta 7}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item Si $G$ es un grafo conexo entonces no es un grafo junta.
+    \item La existencia de un ciclo en un grafo asegura que el grafo es conexo.
+\end{itemize}
+
+\textbf{Explicación}
+
+Esta era la que había que elegir las \textbf{falsas}.
+
+\begin{itemize}
+    \item \textit{Si $G$ es un grafo conexo entonces no es un grafo junta.} Contraejemplo: $K_2$.
+    \item \textit{La existencia de un ciclo en un grafo asegura que el grafo es conexo.} Contraejemplo: $K_3 \cup K_1$.
+    \item \sout{El digrafo resultado de darle una orientación a un grafo completo tiene un camino de longitud $n - 1$.} Quizá estemos usando un cañón para esto, pero agarremos el digrafo $D$ en donde cada nodo es una componente fuertemente conexa maximal de la orientación del $K_n$, y hay un arco entre nodos si y solo si hay un arco entre las componentes fuertemente conexas correspondientes. Este digrafo también es la orientación de un completo, pero no tiene ciclos, porque sino los nodos que formasen parte del ciclo en realidad formarían una misma componente fuertemente conexa. Notemos que cualquier camino en $D$ se puede trasladar a $K_n$: pasar por un nodo en $D$ es como pasar por un camino en la componente fuertemente conexa en $K_n$. Si encontramos un camino que pase por todos los nodos de $D$, vamos a encontrar un camino que pase por todos los vértices de $K_n$. Hacemos lo siguiente: agarramos un nodo de $D$ que tenga grado de entrada 0, lo tomamos como el primero del camino, y lo sacamos de $D$. Repetimos esto hasta quedarnos sin nodos en $D$. Como el original era completo, este camino existe en $D$, y por lo tanto encontramos uno en $K_n$ que pasa por todos los vértices.
+    \item \sout{Si $G$ tiene exactamente 2 vértices con grado impar, tiene que haber un camino entre ellos.} Tomemos 2 vértices con grado impar $u$ y $v$. Supongamos que no hay camino entre ellos, o sea, que pertenecen a distintas componentes conexas. Sabemos que la suma de los grados es par en cada componente conexa. Además, no puede haber otro vértice con grado impar en ninguna de las dos componentes conexas, porque $u$ y $v$ eran los únicos vértices de grado impar. Pero entonces hay un sólo vértice de grado impar en cada componente conexa, y la suma tiene que dar impar. \textbf{¡ABSURDO!}
+\end{itemize}
+
+\section*{Pregunta 8}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item Todos los vértices a distancia $k$ de la raíz son visitados antes que los de distancia $k + 1$.
+\end{itemize}
+
+\textbf{Explicación}
+
+\begin{itemize}
+    \item \textit{Todos los vértices a distancia $k$ de la raíz son visitados antes que los de distancia $k + 1$.} Así funciona BFS.
+    \item \sout{Se necesita que el grafo de entrada sea representado con una matriz de adyacencias para alcanzar la complejidad óptima.} Nop, se necesita que sea lista de adyacencias.
+    \item \sout{Para cada grafo $G$ hay un único árbol BFS posible.} Simplemente cambiar el vértice de donde empezás te da un árbol potencialmente diferente.
+    \item \sout{Para toda arista $(u,v)$ del grafo original, o $u$ es ancestro de $v$ en el árbol BFS, o $v$ es ancestro de $u$.} Esto era para DFS nomás. Contraejemplo: $K_3$. 
+\end{itemize}
+
+\section*{Pregunta 9}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item $O(|V| + |E|)$
+\end{itemize}
+
+\textbf{Explicación}
+
+Cada arco $u \rightarrow v$ es visitado una sola vez: ni bien se visita $u$. Cada vértice también es visitado una vez, que es cuando se marca como visitado. Ergo, se hace una cantidad de operaciones proporcional a la suma de los dos.
+
+\section*{Pregunta 10}
+\textbf{Respuestas correctas}
+
+\begin{itemize}
+    \item Ninguna de estas respuestas es correcta.
+\end{itemize}
+
+\textbf{Explicación}
+
+\begin{itemize}
+    \item \sout{\textit{La cantidad de vértices de $D$ con grado de entrada 0.}} Contraejemplo: el grafo $u \rightarrow v$, si se empieza el primer DFS desde $v$.
+    \item \sout{\textit{La cantidad de componentes conexas de $D$.}} Contraejemplo: el grafo $u \rightarrow v$, si se empieza el primer DFS desde $v$.
+    \item \sout{\textit{La cantidad de componentes fuertemente conexas de $D$.}} Contraejemplo: el grafo $u \rightarrow v$, si se empieza el primer DFS desde $u$. \textit{Fua este grafo sirve para todo.}
+    \item \sout{\textit{La cantidad total de vértices de $D$.}} Contraejemplo: el grafo $u \rightarrow v$, si se empieza el primer DFS desde $u$. Para qué pensar en más vértices que 2.
+    \item \textit{Ninguna de estas respuestas es correcta.} Excepto esta.
+\end{itemize}
+
+\section*{Problema A}
+
+\textbf{a)} \[
+f_{c,n,k,g}(i,a,h) = \begin{cases}
+\infty & \text{si } a < 0 \text{ o } h = 0 \text{ o } (i = n+1 \text{ y } a < k)\\
+0 & \text{si } i = n+1 \text{ y } a \geq k \text{ y } h > 0\\
+\min\{\\
+\qquad f_{c,n,k,g}(i+1,a-1,g),\\
+\qquad f_{c,n,k,g}(i+1,a+6,h-1) + c_i,\\
+\qquad f_{c,n,k,g}(i+1,a,h-1)\\
+\} & \text{sino}
+\end{cases}
+\]
+
+Para resolver el problema hace falta llamar a $f_{c,n,k,g}(1,0,g)$.
+
+\textbf{b)} Vamos a usar programación dinámica para no tener que calcular el resultado de un llamado dos veces. En principio creamos una matriz $A$ de enteros con una entrada por cada posible combinación de argumentos de la función $f$. La matriz $A$ va a tener $(n+1) \cdot 6n \cdot g$ entradas, lo cual es demasiado para la complejidad que nos piden. Vamos a tener que hacer algo mejor. Lo que vamos a hacer es acotar un poco más la cantidad de alfajores para los que necesitamos calcular la función.
+
+Observemos que si tenemos muchísimos alfajores en la posición $i$, no vamos a necesitar comprar más en el resto del viaje. En este caso, el costo restante de hacer el recorrido va a ser 0. ¿Cuántos alfajores vamos a necesitar para recortar así? Seguro que por lo menos $k$, porque al final tenemos que llegar con $k$ alfajores. Pero además necesitamos algunos alfajores para ir comiendo en el viaje. Tenemos que comer un alfajor en las próximas $h$ ciudades, y después de eso comer uno cada $g$ ciudades. Es decir, en total necesitamos tener $k + 1 + \frac{(n - i + 1) - h}{g}$ alfajores para poder podar de esta manera. Este número siempre va a ser menor o igual a $k + \frac{n}{g}$, así que simplificamos un poco el código usando esta cuenta en cambio. Modificamos la funcioncita que hicimos antes de esta manera:
+
+\[
+f_{c,n,k,g}(i,a,h) = \begin{cases}
+\infty & \text{si } a < 0 \text{ o } h = 0 \text{ o } (i = n+1 \text{ y } a < k)\\
+0 & \text{si } (i = n+1 \text{ y } a \geq k \text{ y } h > 0) \mathbf{\textbf{ o } a \geq k + \frac{n}{g}}\\
+\min\{\\
+\qquad f_{c,n,k,g}(i+1,a-1,g),\\
+\qquad f_{c,n,k,g}(i+1,a+6,h-1) + c_i,\\
+\qquad f_{c,n,k,g}(i+1,a,h-1)\\
+\} & \text{sino}
+\end{cases}
+\]
+
+Ahora sí, podemos hacer que la matriz de memorización tenga solo $(n+1) \cdot \min\{6n, k + \frac{n}{g}\}\cdot g$ entradas. Como cada llamado recursivo toma $O(1)$, nos queda que la complejidad es $O(n \cdot \min\{n, k + \frac{n}{g}\}\cdot g)$, que es lo que queríamos.
+
+\textbf{c)} Tenemos dos opciones: o analizamos la función que creamos en el punto a), o la que hicimos en el punto b). La del punto b) es un \textbf{QUILOMBO}, así que vamos a empezar por la del a).
+
+\emph{``Pero no entiendo, la función hace tres llamados recursivos en la mayoría de los casos, así que es suficiente decir que es $O(3^n)$ si hacemos backtracking.''} \textbf{NO.} Usar la $O$ grande es dar una cota \emph{superior} a la cantidad de llamados recursivos, pero nosotros queremos una cota \emph{inferior}. 
+
+Bueno, suponete que tratamos de decir que la cantidad de llamados recursivos es $\Omega(3^n)$. ¿Qué pasa, por ejemplo, si $g=1$? Sí o sí Alfredo va a tener que comerse un alfajor en cada ciudad y nada más. Como Alfredo empieza sin alfajores, se pone de mal humor inmediatamente. Hubo $O(1)$ llamados recursivos, lo cual es una función muuucho más chica que $3^n$. O sea, seguro que entonces no podemos decir que la función es $\Omega(3^n)$. Ni siquiera podemos decir que la función depende solo de $n$, porque si $g=1$ no nos importa el valor del resto de los argumentos para la cantidad de llamados.
+
+Vamos a tener que partir en casos entonces. Y sabemos qué pasa cuando $g=1$. ¿Qué otros casos hay? Vamos a partir en casos.
+
+\begin{itemize}
+    \item $g=1$: $O(1)$
+    \item $g=2$: Alfredo tiene que comer un alfajor cada dos ciudades. Lo primero que tiene que hacer es sí o sí comprar un alfajor, y en la siguiente ciudad comérselo. Después está más libre, aparte de tener que comer un alfajor cada dos ciudades. De alguna forma, cada llamado recursivo hace:
+    \begin{enumerate}
+    \item o un solo llamado recursivo que no cae en un caso base, si se quedó sin alfajores y tiene que comprar;
+    \item o un solo llamado recursivo que no cae en un caso base, si tiene que comer sí o sí un alfajor;
+    \item o tres llamados recursivos que no caen en casos base, si no está obligado a comer ni a comprar alfajores.
+    \end{enumerate}
+    El primer caso va a pasar cada 12 ciudades como máximo, ya que puede comprar de a 6 alfajores nomás, y se come uno cada dos ciudades. El segundo va a pasar cada dos ciudades, ya que $g=2$. El último va a pasar en todos los otros casos.
+
+    La cantidad de llamados recursivos entonces va a ser por lo menos algo así como \[
+    1 + 1 + 3 + 3 + 3^2 + 3^2 + 3^3 + 3^3 + 3^4 + 3^4 + 3^5 + 3^5 + 3^5 + 3^5 + 3^6 + \dots
+    \]
+    Notar que el $3^5$ se repite 4 veces, porque en el segundo $3^5$ se comió el último alfajor, y Alfredo tuvo que comprar más. Esta cuentita ya está siendo una cota inferior no muy ajustada, pero para lidiar con el tema de que cada 12 ciudades tenemos que repetir el exponente, vamos a ser más laxos todavía: vamos a decir que esta función es $\Omega(3^{n/4})$, porque la máxima cantidad de niveles seguidos sin aumentar el exponente es 4.
+    \item $g>2$: Por suerte lo que dijmos antes fue una cota inferior, y ahora Alfredo puede haber tomado esas mismas decisiones (comer un alfajor cada 2 ciudades), u otras más, así que sigue siendo una cota inferior. Usamos en este caso entonces la misma cota de $\Omega(3^{n/4})$.
+\end{itemize}
+
+Genial, entonces nos queda que si $g=1$, tenemos $\Omega(1)$ llamados recursivos, y sino tenemos $\Omega(3^{n/4})$. \emph{``Pero pará, no quiere decir esto que es siempre $\Omega(3^{n/4})$? O sea, el $\Omega$ nos dice cosas cuando la función tiende a infinito.''} \textbf{NO.} La $\Omega$ nos dice cosas tomando en cuenta que cualquiera de los parámetros de la función puede quedarse constante. No es cierto que si $g$ queda constante la función de cantidad de llamados recursivos crece más rápido que $3^{n/4}$ con respecto a $n$, y entonces sería falso decir que es $\Omega(3^{n/4})$.
+
+Resumiendo, nos queda que la cantidad de llamados recursivos es $\Omega(\mathsf{llamados}(n, g))$, donde \[
+\mathsf{llamados}(n,g) = \begin{cases}
+1 & \text{si } g = 1\\
+3^{n/4} & \text{sino}
+\end{cases}
+\]
+
+Comparemos esto con la función de estados, que dijimos que es $O(n \cdot n \cdot g)$. Claramente si $g=1$ no hay ninguna superposición de estados. Y si $g > 1$, con $n$ suficientemente grande, seguro que sí, porque $n \cdot n \cdot g \leq n^3 \in O(3^{n/4})$.
+
+Terminamos con el análisis para la función que definimos en el a). Para la del b) la idea sería separar en casos según el valor de $\frac{n}{g}$ y de $k$; si $k + \frac{n}{g} \leq 6$ ya sabemos que la primera compra que haga Alfredo va a caer en un caso base, y como sí o sí va a tener que hacer una compra antes de comer y en una de las primeras $g$ ciudades, van a haber máximo $g$ llamados recursivos que no sean a casos base. Si, en cambio, $k + \frac{n}{g} > 6$, Alfredo siempre va a poder comprar, comer un alfajor, y después elegir entre comer un alfajor o no hacer nada en cada ciudad hasta que tenga que comprar de nuevo, o sea que la cantidad de llamados recursivos no va a ser constante. Si quieren hacerla la dejamos de tarea.
+
+\textbf{d)} Si, es posible. Una vez que terminamos de calcular los valores de la matriz de memorización, nos fijamos en el elemento en la posición $(i=0, a=0, h=g)$. Desde ahí, revisamos los elementos en las posiciones $(i=1, a=6, h=g)$ y $(i=1, a=0, h=g-1)$. Elegimos el que haya elegido el algoritmo de dinámica, comparando si el elemento en $(i=1, a=6, h=g)$ más $c_i$ es menor al de $(i=1, a=0, h=g-1)$. Guardamos en un arreglo esa decisión tomada, sea de compra o de no hacer nada, y pasamos a hacer lo mismo parándonos en la posición correspondiente. De alguna manera, estamos tomando las mismas decisiones que tomó el algoritmo anterior, pero ahora almacenando los pasos exactos que tomamos.
+
+\section*{Problema B}
+
+Primero, traduzcamos los conceptos que nos presentan.
+\begin{itemize}
+\item \textbf{Mantenible:} sin ciclos.
+\item \textbf{Orden de actualización seguro:} orden topológico en el digrafo traspuesto.
+\end{itemize}
+
+\textbf{a)} Nos piden demostrar que si $D$ es acíclico, entonces tiene un orden topológico en el traspuesto. Sabemos que si un digrafo es acíclico entonces tiene por lo menos un sumidero. Lo hacemos entonces por inducción en la cantidad de vértices: si tiene uno solo, claramente el orden que tiene el único vértice es topológico, porque no hay loops. Si tiene más de uno, sacamos un vértice $v$ que sea sumidero, obtenemos un orden seguro $\sigma$ de $D - v$, y le enchufamos $v$ al principio. Este sigue siendo un orden seguro, porque $v$ no depende de nadie, todos los que dependen de $v$ están después de $v$, y para todo otro par de vértices ya era seguro. QED.
+
+Otra forma era demostrar que el \href{https://en.wikipedia.org/wiki/Tree_traversal#Post-order,_LRN}{post-order} armaba un orden topológico del digrafo, lo dejamos para ustedes.
+
+\textbf{b)} Primero, vemos si el digrafo tiene algún ciclo. Creo que vieron en la teórica que un digrafo tiene ciclos si y sólo si tiene back edges en un recorrido DFS, así que esto es fácil y se hace en $O(n+m)$. Si tiene ciclos, listo, decimos que no es mantenible. Si no los tiene, hacemos lo que dijimos en el punto a): agarramos un vértice sumidero cualquiera, lo ponemos al principio del orden, lo sacamos del grafo, y repetimos hasta quedarnos sin vértices. Hay que tener cuidado con la complejidad acá: si buscamos un sumidero nuevo cada vez se nos va a $O(n^2)$. Lo que hacemos entonces es marcar cada vértice con su respectivo grado de salida al principio, y ponemos todos los que tengan grado 0 en una cola. Cuando sacamos un vértice $v$, restamos uno al grado de salida de todos los vértices que llegaban a $v$, y agregamos a la cola a todos aquellos que ahora tengan grado cero en consecuencia. Así, hacemos $O(m+n)$ para marcar todos los grados al principio, después $O(\mathrm{deg_ {in}}(v))$ por cada vértice de $D$, o sea, $O(m)$, y $O(n)$ para agregar y sacar cada vértice de la cola. En total, $O(n + m)$. 
+
+El otro algoritmo sería hacer el post-order del digrafo y punto, pero quizá era más difícil de demostrar en el a).
+
+\textbf{c)} El pseudocódigo se los dejo a ustedes.
+
+
+\end{document}
